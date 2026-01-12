@@ -21,6 +21,12 @@ class Newark_departures_scrape(Root_class):
 
 
     def soup_scrape_UA_arrivals(self):
+        """
+        Scrapes United Airlines arrival data for Newark (EWR) for different times of the day.
+        
+        Returns:
+            list: A list of BeautifulSoup objects representing the scraped pages for different time blocks.
+        """
         day_times = {
                     'very_early_morn': '?tp=0',
                     'morning': '?tp=6',
@@ -145,6 +151,17 @@ class Newark_departures_scrape(Root_class):
 
 
     def time_converter(self,flight_id, time_data):
+        """
+        Converts time string to a standardized 24-hour format.
+        
+        Args:
+            flight_id (str): The flight identifier (used for logging context).
+            time_data (str): The time string to convert (e.g., "1:30 pm").
+            
+        Returns:
+            str: The converted time in "HH:MM" format.
+            None: If the time pattern does not match.
+        """
         # TODO declutter: assess this time pattern and can this be reused elsewhere, if yes,
             # move it away to root_class or separate data validation and conversion file.?
         pattern = r"(\d{1,2}):(\d{2})\s*(am|pm)"
@@ -166,6 +183,17 @@ class Newark_departures_scrape(Root_class):
 
 
     def validate_date(self,flight_id, date_str):
+        """
+        Validates that a date string matches the expected format "%B %d, %Y".
+        
+        Args:
+            flight_id (str): The flight identifier (used for logging context).
+            date_str (str): The date string to validate.
+            
+        Returns:
+            str: The valid date string.
+            bool: False if the validation fails.
+        """
         try:
             datetime.strptime(date_str, "%B %d, %Y").date()
             return date_str

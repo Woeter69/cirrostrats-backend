@@ -15,11 +15,29 @@ class RealTimeSearchRanker:
         self.searches = {}  # Format: {'query': {'hits': float, 'last_updated': datetime}}
 
     def compressed_sigmoid(self, x):
+        """
+        Applies a compressed sigmoid function to normalize the input value.
+        
+        Args:
+            x (float): The input value (popularity count).
+            
+        Returns:
+            int: The normalized value, scaled by 3.
+        """
         # sigmoid = 1 / (1 + math.exp(-self.k * (x - self.theta)))              # OG
         sigmoid = math.sqrt(1 / ((1/self.k) + math.exp(-(x * self.theta))))
         return int(sigmoid*3)
 
     def log_search(self, query):
+        """
+        Logs a search query and updates its popularity score with exponential decay over time.
+        
+        Args:
+            query (str): The search query to log.
+            
+        Returns:
+            int: The updated and normalized popularity score for the query.
+        """
         now = datetime.now()
         is_new = query not in self.searches
 

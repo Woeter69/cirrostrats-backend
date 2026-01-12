@@ -75,7 +75,17 @@ class FlightStatsExtractor:
     
 
     def ticket_card_extracts(self, tc:list):
+        """
+        Extracts specific flight details from a list of BeautifulSoup elements found in a ticket card.
         
+        Args:
+            tc (list): A list of BeautifulSoup elements representing parts of the ticket card.
+            
+        Returns:
+            dict: A dictionary containing extracted flight details such as code, city, airport name,
+                  scheduled time, estimated/actual time, and terminal/gate information.
+            None: If the number of extracted items is insufficient (less than 13).
+        """
         extracts = []
         for i in range(len(tc)):
             data = tc[i]
@@ -128,7 +138,17 @@ class FlightStatsExtractor:
 
 
     def ticket_card(self, soup_fs):
-
+        """
+        Orchestrates the extraction of flight data from the main flight status BeautifulSoup object.
+        It extracts departure and arrival information and the flight's delay status.
+        
+        Args:
+            soup_fs (BeautifulSoup): The BeautifulSoup object of the flight status page.
+            
+        Returns:
+            dict: A dictionary containing 'fsDeparture', 'fsArrival' details, and 'fsDelayStatus'.
+            None: If the structure of the page (ticket cards) is not as expected (e.g., flight not found).
+        """
         delay_status = self.delay_status(soup_fs=soup_fs)
         Ticket_Card = soup_fs.select('[class*="TicketCard"]')           # returns a list of classes that matches..
 

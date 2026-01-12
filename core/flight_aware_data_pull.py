@@ -17,6 +17,17 @@ class Flight_aware_pull(Root_class):
 
 
     def extract_flight_aware_data(self, flights:list):
+        """
+        Extracts and processes relevant flight data from a list of FlightAware flight records.
+        
+        Args:
+            flights (list): A list of dictionaries containing flight data from FlightAware.
+            
+        Returns:
+            dict: A dictionary containing processed flight details such as ICAO codes, times,
+                  terminals, gates, altitude, route, and SkyVector link.
+                  Returns self.attrs (initialized with Nones) if extraction fails.
+        """
         # TODO: Dangerous, bad code and unnecessary logic.
         route = None        # Declaring not available unless available through flights
         filed_altitude, filed_ete,  = None, None

@@ -46,7 +46,15 @@ class Weather_parse:
         # self.RW_IN_US = r'(ARRIVALS EXPECT|SIMUL|RUNWAYS|VISUAL|RNAV|ILS(,|RY|))(.*?)\.'
 
     def visibility_color_code(self,incoming_weather_data):
-
+        """
+        Applies HTML coloring to visibility data in weather strings based on LIFR/IFR conditions.
+        
+        Args:
+            incoming_weather_data (str): The raw weather data string.
+            
+        Returns:
+            str: The weather data string with HTML tags injected for highlighting.
+        """
         # Surrounds the matched pattern with the html declared during initialization(the __init__ method).
         lifr_frac = re.sub(self.lifr_fractional_patt, self.pink_text_color,incoming_weather_data)
         ifr_frac = re.sub(self.ifr_fractional_patt, self.red_text_color,lifr_frac)
@@ -120,6 +128,17 @@ class Weather_parse:
             return 'N/A'
 
     def zulu_recency(self, weather_input, datis=None, taf=None):
+        """
+        Calculates how long ago the weather report was issued (in minutes) and formats it with color coding.
+        
+        Args:
+            weather_input (str): The raw weather string containing a Zulu time.
+            datis (bool, optional): Whether the input is DATIS data. Defaults to None.
+            taf (bool, optional): Whether the input is TAF data. Defaults to None.
+            
+        Returns:
+            str: A formatted HTML string indicating the recency of the report (e.g., "10 mins ago").
+        """
         """ TODO:
             1. Hazard-- If the weather is over a month old or even day, the zt may be way off.
             2. Datis,metar sometimes have multiple zulu times. check weather_examination for this anomaly - zulu_anomaly 
@@ -198,6 +217,16 @@ class Weather_parse:
         return final_highlight
 
     def html_injected_weather(self, weather_raw):
+        """
+        Orchestrates HTML injection into weather data for display highlighting.
+        Highlights flight categories (LIFR, IFR, etc.), altimeter, LLWS, and active runways.
+        
+        Args:
+            weather_raw (dict): Dictionary containing raw 'datis', 'metar', and 'taf' data.
+            
+        Returns:
+            dict: Processed weather data dict with injected HTML and recency info.
+        """
         """ This function takes in either mock_test_data or weather_raw as dict with datis, metar, taf data.
             html injection is done here for highlighting purposes - LIFR, IFR, Alternate IFR, ATIS code, 
             altimeter settings, LLWS, RW in use, and such are highlighted in this function.

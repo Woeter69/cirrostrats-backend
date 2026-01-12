@@ -49,6 +49,13 @@ class QueryClassifier:
 
 
     def initialize_search_index_collection(self):
+        """
+        Initializes and caches the search index collection from the database.
+        It retrieves documents with popularity hits ('ph') and sorts them by popularity in descending order.
+        
+        Returns:
+            list: A list of documents from the search index collection.
+        """
         """ Cache the collections for searchbar dropdown"""
         # search index finds - sorted ph returns from the search index collection.
         count_crit = {'ph':{"$exists":True}}       # return ones with popularity hits
@@ -137,6 +144,16 @@ class QueryClassifier:
 
 
     def temporary_n_number_parse_query(self,query):
+        """
+        Checks if the query matches an N-number (aircraft registration) pattern.
+        
+        Args:
+            query (str): The query string to check.
+            
+        Returns:
+            dict: A dictionary with category 'N-Number' and the query value if it matches.
+            None: If the query does not match the N-number pattern.
+        """
         n_pattern = re.compile("^N[a-zA-Z0-9]{5}$")
         
         if n_pattern.match(query):
@@ -188,6 +205,13 @@ class QueryClassifier:
 
 
     def data_cleaner(self):
+        """
+        Cleans and consolidates classified suggestions.
+        It aggregates counts for duplicate entries within each category.
+        
+        Returns:
+            dict: A dictionary containing cleaned and consolidated suggestions for each category.
+        """
         """ Classifier didnt account for duplicate flight numbers. this section takes care of it all.
             Converts tuple to dict as well. Safe and sound! :)) """
         o={}
@@ -203,6 +227,19 @@ class QueryClassifier:
 
 
     def compress_sigmoid(self, x, k=1/30, theta=100,cap_height=10):
+        """
+        Applies a compressed sigmoid function to a value.
+        This is used to normalize and cap popularity hits.
+        
+        Args:
+            x (float): The input value.
+            k (float, optional): Steepness of the curve. Defaults to 1/30.
+            theta (float, optional): The midpoint of the curve. Defaults to 100.
+            cap_height (float, optional): The maximum value of the function. Defaults to 10.
+            
+        Returns:
+            float: The transformed value.
+        """
         """Theta moves func left and right, k is the squeeze stretch spread on x. So higher the x range smaller you want your k to account for higher ranges
         for k=1/30 the func caps hight for vals x>300
         """
@@ -217,6 +254,12 @@ class QueryClassifier:
 
 
     def normalize(self):
+        """
+        Normalizes the popularity hits for all classified suggestions using the compress_sigmoid function.
+        
+        Returns:
+            dict: The classified suggestions with normalized popularity scores.
+        """
         cc = self.classified_suggestions
         for cat,vals in cc.items():
             sa = {}
@@ -282,6 +325,12 @@ class QC_base_popularity_hits(QueryClassifier):
     
 
     def qc_ranker(self):
+        """
+        Orchestrates the ranking process by loading data, classifying batches, cleaning, and normalizing.
+        
+        Returns:
+            dict: Normalized classified suggestions.
+        """
         from core.search.query_classifier import QueryClassifier
 
         suggestions, flightID_batch,airports_batch,icaos = self.pickle_loads()
@@ -300,6 +349,16 @@ class QC_base_popularity_hits(QueryClassifier):
         return nn
 
     def nn_pass_code_share_partners(self,collection_flights):
+        """
+        Identifies and processes code-share partners for flights.
+        Specifically looks for 'UAL' and 'UCA' prefixes and assigns default popularity scores.
+        
+        Args:
+            collection_flights: The MongoDB collection containing flight data.
+            
+        Returns:
+            list: A list of dictionaries to be uploaded/updated in the database.
+        """
         nn = self.nn
         """ Look up popular UA code share only and UAL icaos and  using regex in the collection_flights.
             assign default ph, pass through sigmoid and 
@@ -336,6 +395,16 @@ class QC_base_popularity_hits(QueryClassifier):
         # result = search_index_collection.bulk_write(update_operations)
         
     def nn_popular_flights_and_airports_sorted(self,collection_flights):
+        """
+        Processes and sorts popular flights and airports.
+        It matches flight IDs and airport codes with the database and assigns popularity scores.
+        
+        Args:
+            collection_flights: The MongoDB collection containing flight data.
+            
+        Returns:
+            list: A sorted list of documents to be uploaded to the search index collection.
+        """
         # returns popular flights and airport returns
         nn= self.nn
 
@@ -393,6 +462,15 @@ class QC_base_popularity_hits(QueryClassifier):
         return all_docs_to_upload
         
     def gate_popularity(self,collection_gates):
+        """
+        Calculates popularity scores for gates based on search history.
+        
+        Args:
+            collection_gates: The MongoDB collection containing gate data.
+            
+        Returns:
+            list: A list of gate documents with popularity scores.
+        """
         nn= self.nn
         
         # include 'C' in match exclude it in returns and discardempty ones.
@@ -419,6 +497,9 @@ class QC_base_popularity_hits(QueryClassifier):
     
         # list(collection_gates.find({}, {'Gate':1}))
     def col_metrics(self):
+        """
+        Logs metrics about the search index collection.
+        """
         # search_index_collection.insert_many(all_docs_to_upload)
         
         # search_index_collection.find_one({})

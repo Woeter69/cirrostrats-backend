@@ -4,6 +4,23 @@ from fuzzywuzzy import fuzz, process
 
 """ Uses the frontend formatted search_index_collection to search and deliver fuzz found results."""
 def fuzz_find(query, data, qc, limit=5):
+    """
+    Performs a fuzzy search on the provided data using the query string.
+    
+    Prioritizes exact prefix matches for short queries and then falls back to fuzzy matching
+    using the ratio of similarity.
+    
+    Args:
+        query (str): The search query string.
+        data (list): A list of dictionaries containing the data to search. Each dictionary
+                     should have a 'fuzz_find_search_text' key.
+        qc (QueryClassifier): An instance of the QueryClassifier class (used for parsing queries
+                              if needed, though currently only used if the query length is > 2).
+        limit (int, optional): The maximum number of results to return. Defaults to 5.
+        
+    Returns:
+        list: A list of matching items from the data list.
+    """
     # For very short queries, prioritize prefix matching
     if len(query) <= 2:
 

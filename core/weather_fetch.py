@@ -27,6 +27,16 @@ class Weather_processor:
         pass
 
     def resp_splitter(self, airport_code, resp_dict):
+        """
+        Splits the raw response dictionary into separate METAR, TAF, and DATIS components.
+        
+        Args:
+            airport_code (str): The airport identifier.
+            resp_dict (dict): Dictionary where keys are URLs and values are response contents.
+            
+        Returns:
+            tuple: A tuple containing (metar, taf, datis) raw data.
+        """
         metar,taf,datis = ['']*3
 
         for url,resp in resp_dict.items():
@@ -42,6 +52,18 @@ class Weather_processor:
         return metar,taf,datis
 
     def raw_resp_weather_processing(self, resp_dict, airport_id, html_injection=False):
+        """
+        Processes raw weather responses into a structured dictionary.
+        Optionally injects HTML for frontend display.
+        
+        Args:
+            resp_dict (dict): Raw response dictionary from the fetcher.
+            airport_id (str): The airport identifier.
+            html_injection (bool, optional): Whether to inject HTML styling. Defaults to False.
+            
+        Returns:
+            dict: Processed weather data with keys 'datis', 'metar', 'taf'.
+        """
         # TODO Datis: Why is this here?
         metar,taf,datis = self.resp_splitter(airport_id, resp_dict)
         raw_weather_returns = {"datis":datis,"metar":metar,"taf":taf}
@@ -73,6 +95,13 @@ class Bulk_weather_fetch:
         self.weather_links_dict = self.bulk_weather_link_returns()
 
     def bulk_weather_link_returns(self) -> None:
+        """
+        Generates lists of weather data URLs for bulk fetching.
+        It compiles lists for DATIS, METAR, and TAF based on airport codes from the database and pickle files.
+        
+        Returns:
+            dict: A dictionary containing lists of URLs for 'datis', 'metar', and 'taf'.
+        """
         # Returns weather links for all airports with code.
 
         # TODO weather: Fix IATA/ICAO issue - WIP -- collection_airports documents gotta be migrated to uj collection with appropriate IATA/ICAO
@@ -125,6 +154,16 @@ class Bulk_weather_fetch:
         }
 
     def bulk_list_of_weather_links(self,type_of_weather,list_of_airport_codes):
+        """
+        Helper function to generate a list of URLs for a specific weather type.
+        
+        Args:
+            type_of_weather (str): 'metar', 'taf', or 'datis'.
+            list_of_airport_codes (list): List of airport codes to generate links for.
+            
+        Returns:
+            list: A list of full URLs.
+        """
         # Returns datis links from claud.ai and aviation weather links for metar and taf from aviationwather.gov
         # TODO: collection_airports code issue fix
         # TODO weather: Fix IATA/ICAO issue - WIP -- collection_airports documents gotta be migrated to uj collection with appropriate IATA/ICAO
@@ -135,6 +174,15 @@ class Bulk_weather_fetch:
         return [self.rsl.weather(weather_type=type_of_weather,airport_id=prepend+each_airport_code) for each_airport_code in list_of_airport_codes]
 
     def bulk_datis_processing(self, resp_dict:dict):
+        """
+        Processes bulk DATIS responses, extracting and cleaning the data.
+        
+        Args:
+            resp_dict (dict): Dictionary mapping URLs to raw DATIS response strings.
+            
+        Returns:
+            dict: The updated dictionary with processed DATIS data.
+        """
         # TODO Test: a similar function exists in -- weather_parse().datis_processing().
 
         # print('Processing Datis')
@@ -185,6 +233,10 @@ class Bulk_weather_fetch:
 
     
     def mdb_unset(self,):
+        """
+        Removes the 'weather' field from all documents in the weather collection.
+        This is typically used before a fresh bulk update to clean old data.
+        """
         # Attempt to update the document. In this case remove a field(key value pair).
         weather = {             # This weather dict wouldnt be necessary since the unset operator is removing the whole weather field itself.
             'metar':'',
@@ -204,6 +256,13 @@ class Bulk_weather_fetch:
                 )
     
     def mdb_updates(self,resp_dict: dict, weather_type):
+        """
+        Bulk updates the weather collection with new weather data.
+        
+        Args:
+            resp_dict (dict): Dictionary mapping URLs (containing airport codes) to weather data.
+            weather_type (str): The type of weather being updated ('metar', 'taf', 'datis').
+        """
         # This function creates a list of fields/items that need to be upated and passes it as bulk operation to the collection.
         # TODO Test: account for new airport codes, maybe upsert or maybe just none for now.
         # print('Updating mdb')
@@ -245,13 +304,31 @@ class Singular_weather_fetch:
         pass
 
     def link_returns(self, weather_type, airport_id):
+        """
+        Generates a fetch URL for a single airport and weather type.
+        
+        Args:
+            weather_type (str): 'metar', 'taf', or 'datis'.
+            airport_id (str): The airport identifier.
+            
+        Returns:
+            str: The URL to fetch weather data from.
+        """
         # TODO datis: This Requires refactoring at source in Root_source_links.weather since weather doesnt have self arg.
         rsl = Root_source_links
         wl = rsl.weather(weather_type,airport_id)
         return wl
 
     async def async_weather_dict(self, ICAO_code_to_fetch):
-
+        """
+        Asynchronously fetches all weather types (METAR, TAF, DATIS) for a single airport.
+        
+        Args:
+            ICAO_code_to_fetch (str): The ICAO code of the airport.
+            
+        Returns:
+            dict: A dictionary containing the processed weather data for the airport.
+        """
         fm = Fetching_Mechanism()
         wl_dict = {weather_type:self.link_returns(weather_type,ICAO_code_to_fetch) for weather_type in ('metar', 'taf','datis')}
         resp_dict: dict = await fm.async_pull(list(wl_dict.values()))

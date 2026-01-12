@@ -20,7 +20,14 @@ class Gate_processor(Root_class):
 
 
     def mdb_updates(self, incoming_docs: list, update_type=None):
-        """ Update collecion based on flight id - replace old with new. """
+        """ 
+        Update the gate collection in MongoDB with new flight documents.
+        Uses ReplaceOne to overwrite existing documents based on FlightID or insert if new.
+        
+        Args:
+            incoming_docs (list): List of flight dictionaries to update/insert.
+            update_type (str, optional): Description of the update source (for logging).
+        """
 
         update_operations = []
         for doc in incoming_docs:
@@ -33,6 +40,15 @@ class Gate_processor(Root_class):
 
     
     def mdb_gate_fetch(self, gate_request):
+        """
+        Fetches flights associated with a specific gate from the MongoDB collection.
+        
+        Args:
+            gate_request (str): The gate identifier (regex pattern) to search for.
+            
+        Returns:
+            list: A list of flight documents matching the gate, sorted by scheduled time (descending).
+        """
         find_crit = {'Gate':{'$regex':gate_request}}
         return_crit = {'_id':0}
         flights = list(self.gates_collection.find(find_crit, return_crit))
@@ -55,7 +71,10 @@ class Gate_processor(Root_class):
 
 
     def recurrent_updater(self):
-        """ flights around current eastern time are updated. """
+        """ 
+        Updates flight information for flights scheduled around the current time (Eastern Time).
+        It targets flights scheduled between 30 minutes ago and 2 hours from now that haven't departed yet.
+        """
         
         # Define the Eastern Time zone
         eastern = pytz.timezone('US/Eastern')
@@ -105,6 +124,9 @@ class Gate_processor(Root_class):
 
 
     def scrape_and_store(self,):
+        """
+        Initiates a full scrape of Newark departures and stores the results in MongoDB.
+        """
         
         nds = Newark_departures_scrape()
         flight_rows = nds.gate_scrape_main()

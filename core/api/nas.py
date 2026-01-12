@@ -7,6 +7,12 @@ from core.root_class import AirportValidation
 class NASExtracts:
 
     def nas_xml_fetch(self,):
+        """
+        Fetches the raw XML data from the FAA NAS status API.
+        
+        Returns:
+            bytes: The raw XML content of the response.
+        """
         nas = "https://nasstatus.faa.gov/api/airport-status-information"
         response = requests.get(nas)
         xml_data = response.content
@@ -14,7 +20,18 @@ class NASExtracts:
 
 
     def nas_xml_processor(self):
-
+        """
+        Fetches and processes the NAS XML data into a structured dictionary.
+        
+        Returns:
+            dict: A dictionary containing:
+                - 'update_time': The timestamp of the update.
+                - 'affected_airports': A list of unique affected airport codes.
+                - 'ground_stop_packet': Parsed ground stop information.
+                - 'ground_delay_packet': Parsed ground delay information.
+                - 'arr_dep_del_list': List of arrival/departure delays.
+                - 'Airport Closure': List of airport closure information.
+        """
         xml_raw_data = self.nas_xml_fetch()
 
         root = ET.fromstring(xml_raw_data) 

@@ -13,6 +13,19 @@ class Pull_flight_info(Root_class):
 
 
     def flightstats_dep_arr_timezone_pull(self,airline_code="UA", flt_num_query=None, departure_date:str=None, return_bs4=False):
+        """
+        Pulls departure and arrival information, including timezones, for a given flight using FlightStats.
+        
+        Args:
+            airline_code (str, optional): The airline code (e.g., "UA"). Defaults to "UA".
+            flt_num_query (str, optional): The flight number. Defaults to None.
+            departure_date (str, optional): The departure date in YYYYMMDD format. Defaults to None.
+            return_bs4 (bool, optional): Whether to return the raw BeautifulSoup object. Defaults to False.
+            
+        Returns:
+            dict: A dictionary containing consolidated flight details (status, origin, destination, gates, times).
+            None: If the flight data cannot be found.
+        """
         # TODO Refactor: This function can be refactored to FlightStatsScraper class in core/api
         
         fss = FlightStatsScraper()
@@ -50,5 +63,11 @@ class Pull_flight_info(Root_class):
 
 
     def aviation_stack_pull(self,):
+        """
+        Placeholder for fetching flight data from the Aviation Stack API.
+        
+        Returns:
+            None
+        """
         return None
     

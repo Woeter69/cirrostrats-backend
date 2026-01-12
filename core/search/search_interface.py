@@ -4,13 +4,26 @@ from core.search.query_classifier import QueryClassifier
 
 class SearchInterface(QueryClassifier):
     def __init__(self):
-        """ An interface for collection search suggestions and query submission and processing between frontend and backend."""
+        """ 
+        Initializes the SearchInterface class.
+        It acts as an interface for collection search suggestions, query submission, and processing
+        between the frontend and backend.
+        """
         super().__init__()
         pass
 
 
     def standardize_types(self, val_type):
-        """Ensure consistent type naming across platform"""
+        """
+        Ensure consistent type naming across platform.
+        Maps various type string representations to standard values ('flight', 'airport', 'terminal').
+        
+        Args:
+            val_type (str): The type string to standardize.
+            
+        Returns:
+            str: The standardized type string.
+        """
         TYPE_STANDARDS = {
             'Flight': 'flight',
             'FLIGHT': 'flight', 
@@ -27,6 +40,16 @@ class SearchInterface(QueryClassifier):
 
 
     def raw_submit_handler(self, search):
+        """
+        Handles raw search submissions from the frontend.
+        It processes the query, identifies its type, and formats it for the frontend details view.
+        
+        Args:
+            search (str): The raw search query string.
+            
+        Returns:
+            dict: A formatted dictionary containing the query field, label, display text, and type.
+        """
         """ the raw submit is supposed to return frontend formatted reference_id, display and type for
             /details.jsx to fetch appropriately based on the type formatting, whereas dropdown suggestions
             contain similar format with display field for display and search within fuzzfind"""
@@ -45,6 +68,16 @@ class SearchInterface(QueryClassifier):
 
 
     def query_type_frontend_conversion(self,doc):
+        """
+        Converts backend/database data formats into frontend-compatible query types.
+        Handles inconsistencies in type naming and categorizes data into 'airport', 'flight', or 'Terminal/Gate'.
+        
+        Args:
+            doc (dict): The document or parsed query dictionary to convert.
+            
+        Returns:
+            tuple: A tuple containing (query_field, query_val, query_type).
+        """
         """
         Typically 3 types of queries - airport, flight or gate
         searchcc
@@ -101,6 +134,18 @@ class SearchInterface(QueryClassifier):
 
 
     def search_suggestion_frontned_format(self, c_docs):
+        """
+        Formats search suggestions for the frontend.
+        It takes the raw documents, converts types, and constructs a list of dictionaries
+        suitable for the frontend search suggestion dropdown, including popularity hits ('ph')
+        and text for fuzzy searching.
+        
+        Args:
+            c_docs (list): List of documents (from database or classifier).
+            
+        Returns:
+            list: A sorted list of formatted search suggestion dictionaries.
+        """
         """ Suggestions formatter for frontend compatibility. Takes in sic docs as is,
             It first goes to the fuzzfind then to frontend which is processed again.
             There's quite a bit of unnecessary formatting and processing during this three way process
